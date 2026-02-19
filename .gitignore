@@ -13,7 +13,9 @@ dist-ssr
 *.local
 target
 **/.build
+**/.swiftpm
 apps/macos/MeetingAssistantMac/Vendor
+.codex/
 
 # Editor directories and files
 .vscode/*

@@ -1,0 +1,12 @@
+[package]
+name = "meeting_core_ffi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+meeting_core = { path = "../meeting_core" }
+serde_json = "1"
+

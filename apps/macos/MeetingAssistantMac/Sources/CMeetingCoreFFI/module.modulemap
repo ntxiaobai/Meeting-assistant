@@ -1,0 +1,5 @@
+module CMeetingCoreFFI {
+  header "include/meeting_core_ffi.h"
+  export *
+}
+

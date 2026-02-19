@@ -60,3 +60,14 @@ swift build --package-path apps/macos/MeetingAssistantMac
   ./scripts/macos/build_rust_ffi.sh
   MEETING_USE_RUST_FFI=1 ./scripts/macos/xcode_build.sh
   ```
+
+## Build DMG (drag-and-drop install)
+From repository root:
+
+```bash
+./scripts/macos/build_dmg.sh v0.1.1
+```
+
+Output files:
+- `dist/MeetingAssistantMac-v0.1.1-macos.dmg`
+- `dist/MeetingAssistantMac-v0.1.1-macos.dmg.sha256`

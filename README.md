@@ -42,6 +42,7 @@ swift build --package-path apps/macos/MeetingAssistantMac
 ### 5. 常用脚本
 - `./scripts/macos/build_rust_ffi.sh`：构建并复制 Rust FFI 产物到 Vendor
 - `./scripts/macos/xcode_build.sh`：使用 `xcodebuild` 构建 Swift 包
+- `./scripts/macos/build_dmg.sh`：构建 `.app` 并打包为可拖拽安装的 `.dmg`
 - `./scripts/macos/open_in_xcode.sh`：直接打开 `Package.swift`
 - `./scripts/macos/build_iconset.sh`：从源图生成 iconset/icns
 
@@ -54,6 +55,25 @@ swift build --package-path apps/macos/MeetingAssistantMac
 ### 7. 常见问题
 - `xcodebuild: command not found`：请安装完整 Xcode，而非仅 Command Line Tools。
 - Rust FFI 模式链接失败：先执行 `./scripts/macos/build_rust_ffi.sh`，并检查 `MEETING_RUST_FFI_LIB_DIR` 是否正确。
+
+### 8. 生成 DMG 并上传 GitHub Release
+1. 打包 DMG（默认 Release）：
+```bash
+./scripts/macos/build_dmg.sh v0.1.1
+```
+2. 推送标签：
+```bash
+git tag v0.1.1
+git push origin v0.1.1
+```
+3. 上传到 GitHub Release（需先 `gh auth login`）：
+```bash
+gh release create v0.1.1 \
+  ./dist/MeetingAssistantMac-v0.1.1-macos.dmg \
+  ./dist/MeetingAssistantMac-v0.1.1-macos.dmg.sha256 \
+  --title "v0.1.1" \
+  --notes "macOS DMG release"
+```
 
 ---
 
@@ -97,6 +117,7 @@ swift build --package-path apps/macos/MeetingAssistantMac
 ### 5. Useful Scripts
 - `./scripts/macos/build_rust_ffi.sh`: build and copy Rust FFI artifacts
 - `./scripts/macos/xcode_build.sh`: build via `xcodebuild`
+- `./scripts/macos/build_dmg.sh`: build `.app` and package a drag-and-drop install `.dmg`
 - `./scripts/macos/open_in_xcode.sh`: open `Package.swift` in Xcode
 - `./scripts/macos/build_iconset.sh`: generate iconset/icns from source image
 
@@ -109,3 +130,22 @@ swift build --package-path apps/macos/MeetingAssistantMac
 ### 7. Troubleshooting
 - `xcodebuild: command not found`: install full Xcode, not only CLI tools.
 - Rust FFI linking issues: run `./scripts/macos/build_rust_ffi.sh` first and verify `MEETING_RUST_FFI_LIB_DIR`.
+
+### 8. Build DMG and Publish to GitHub Release
+1. Build DMG (Release by default):
+```bash
+./scripts/macos/build_dmg.sh v0.1.1
+```
+2. Push tag:
+```bash
+git tag v0.1.1
+git push origin v0.1.1
+```
+3. Upload release assets (requires `gh auth login`):
+```bash
+gh release create v0.1.1 \
+  ./dist/MeetingAssistantMac-v0.1.1-macos.dmg \
+  ./dist/MeetingAssistantMac-v0.1.1-macos.dmg.sha256 \
+  --title "v0.1.1" \
+  --notes "macOS DMG release"
+```

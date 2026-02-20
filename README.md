@@ -1,151 +1,59 @@
-# Meeting Assistant (macOS)
+# Meeting Assistant (macOS) 使用说明
 
-> A macOS-only meeting assistant built with SwiftUI + Rust FFI.
+Meeting Assistant 是一个面向 macOS 的会议辅助应用，提供实时转写、翻译、回答提示和悬浮窗能力。
 
-## 中文说明
+## 1. 主要功能
+- 实时语音转写（ASR）：支持 Deepgram / 阿里云。
+- 实时翻译：支持 Microsoft Translator / 阿里云。
+- 回答提示：支持 Anthropic、OpenAI 或自定义兼容接口。
+- 悬浮窗：显示实时内容，支持透明度和置顶设置。
+- 菜单栏快捷控制：快速开始/停止会话、切换输入源与 ASR。
+- 多凭据集合：可为不同客户/会议场景保存并切换独立 API 凭据。
 
-### 1. 项目简介
-Meeting Assistant 是一个 macOS 单平台桌面应用，采用：
-- SwiftUI（原生 UI）
-- Rust `meeting_core` + `meeting_core_ffi`（核心能力与 FFI）
+## 2. 系统要求
+- macOS 14 或更高版本。
+- 可访问各服务商 API 的网络环境。
+- 对应服务商有效 API Key（按你选择的功能配置）。
 
-当前仓库已经移除旧的 Tauri/React 实现，主分支仅保留 macOS 版本。
+## 3. 安装
+1. 从项目 Release 下载 `.dmg` 安装包。
+2. 打开 `.dmg`，将 `MeetingAssistantMac.app` 拖入“应用程序”。
+3. 首次启动时如遇系统安全提示，按 macOS 指引允许打开。
 
-### 2. 目录结构
-```text
-apps/macos/MeetingAssistantMac     # SwiftUI 应用
-crates/meeting_core                # Rust 核心逻辑
-crates/meeting_core_ffi            # Rust FFI 导出层
-scripts/macos                      # 构建与辅助脚本
-```
+## 4. 首次使用配置
+1. 打开应用后，进入“语音链路”页。
+2. 选择输入源：`System`（系统声音）、`Microphone`（麦克风）、`Mixed`（系统声音+麦克风）。
+3. 如果使用 `System` 或 `Mixed`，点击“打开屏幕录制权限设置”，在系统设置里授予权限。
+4. 配置 ASR：选择 Deepgram 或阿里云，填写并保存密钥，再点击“测试语音链路连接”确认可用。
+5. 配置翻译（可选）：在“翻译”页开启开关，选择 Microsoft 或阿里云，填写并保存密钥，设置源/目标语言（例如 `en` -> `cn`），并点击“测试翻译链路连接”。
+6. 配置回答提示（可选）：在“回答提示”页选择 Provider 与模型，填写 API Key 并保存，然后点击“测试提示模型连接”。
 
-### 3. 环境要求
-- macOS 14+
-- Xcode（完整安装，含 `xcodebuild`）
-- Rust stable（`rustup` + `cargo`）
+## 5. 日常使用流程
+1. 在主界面点击“启动会话”。
+2. 在“实时转写 / 翻译”区域观察实时文本输出。
+3. 需要悬浮展示时，点击“显示悬浮窗”。
+4. 会议中可随时切换翻译开关和回答提示开关。
+5. 会议结束后点击“停止会话”。
+6. 可在菜单栏图标中进行快捷控制（无需回到主窗口）。
 
-### 4. 快速开始
-#### 4.1 Stub 模式（默认）
-```bash
-swift build --package-path apps/macos/MeetingAssistantMac
-swift run --package-path apps/macos/MeetingAssistantMac
-```
+## 6. 凭据与本地数据
+- API 密钥保存在 macOS Keychain（钥匙串）。
+- 语音与翻译配置保存于：
+  `~/Library/Application Support/MeetingAssistantMac/speech_pipeline_settings.json`
+- 运行日志可在界面中使用“复制日志”导出到剪贴板。
 
-#### 4.2 Rust FFI 模式（推荐）
-```bash
-./scripts/macos/build_rust_ffi.sh
-MEETING_USE_RUST_FFI=1 \
-MEETING_RUST_FFI_LIB_DIR="$(pwd)/apps/macos/MeetingAssistantMac/Vendor/meeting_core_ffi/lib" \
-swift build --package-path apps/macos/MeetingAssistantMac
-```
+## 7. 常见问题
+- 没有转写内容：
+  检查是否已“启动会话”、输入源是否正确、所选 ASR 密钥是否已保存并测试通过。
+- `System` 输入源无声音：
+  通常是“屏幕录制权限”未授权，重新授权后重启应用再试。
+- 翻译没有输出：
+  检查翻译开关是否开启、翻译 Provider 与密钥是否匹配、语言代码是否正确。
+- 回答提示不显示：
+  检查“回答提示”开关、模型名与 API Key，并先执行一次“测试提示模型连接”。
+- 需要切换不同客户账号：
+  在“凭据集合”中新建集合并切换到对应集合。
 
-### 5. 常用脚本
-- `./scripts/macos/build_rust_ffi.sh`：构建并复制 Rust FFI 产物到 Vendor
-- `./scripts/macos/xcode_build.sh`：使用 `xcodebuild` 构建 Swift 包
-- `./scripts/macos/build_dmg.sh`：构建 `.app` 并打包为可拖拽安装的 `.dmg`
-- `./scripts/macos/open_in_xcode.sh`：直接打开 `Package.swift`
-- `./scripts/macos/build_iconset.sh`：从源图生成 iconset/icns
-
-### 6. 环境变量
-- `MEETING_USE_RUST_FFI=1`：启用 Rust FFI 链接
-- `MEETING_RUST_FFI_LIB_DIR`：Rust FFI 库目录
-- `MEETING_RUST_FFI_STATIC_LIB`：可选，指定静态库完整路径
-- `MEETING_XCODE_DESTINATION`：可选，覆盖 `xcodebuild` destination
-
-### 7. 常见问题
-- `xcodebuild: command not found`：请安装完整 Xcode，而非仅 Command Line Tools。
-- Rust FFI 模式链接失败：先执行 `./scripts/macos/build_rust_ffi.sh`，并检查 `MEETING_RUST_FFI_LIB_DIR` 是否正确。
-
-### 8. 生成 DMG 并上传 GitHub Release
-1. 打包 DMG（默认 Release）：
-```bash
-./scripts/macos/build_dmg.sh v0.1.1
-```
-2. 推送标签：
-```bash
-git tag v0.1.1
-git push origin v0.1.1
-```
-3. 上传到 GitHub Release（需先 `gh auth login`）：
-```bash
-gh release create v0.1.1 \
-  ./dist/MeetingAssistantMac-v0.1.1-macos.dmg \
-  ./dist/MeetingAssistantMac-v0.1.1-macos.dmg.sha256 \
-  --title "v0.1.1" \
-  --notes "macOS DMG release"
-```
-
----
-
-## English Guide
-
-### 1. Overview
-Meeting Assistant is now a **macOS-only** desktop app built with:
-- SwiftUI for native UI
-- Rust `meeting_core` + `meeting_core_ffi` for core logic and FFI bridge
-
-Legacy Tauri/React implementation has been removed from `main`.
-
-### 2. Project Layout
-```text
-apps/macos/MeetingAssistantMac     # SwiftUI app
-crates/meeting_core                # Rust core
-crates/meeting_core_ffi            # Rust FFI layer
-scripts/macos                      # Build/helper scripts
-```
-
-### 3. Prerequisites
-- macOS 14+
-- Full Xcode installation (`xcodebuild` available)
-- Rust stable toolchain (`rustup`, `cargo`)
-
-### 4. Quick Start
-#### 4.1 Stub mode (default)
-```bash
-swift build --package-path apps/macos/MeetingAssistantMac
-swift run --package-path apps/macos/MeetingAssistantMac
-```
-
-#### 4.2 Rust FFI mode (recommended)
-```bash
-./scripts/macos/build_rust_ffi.sh
-MEETING_USE_RUST_FFI=1 \
-MEETING_RUST_FFI_LIB_DIR="$(pwd)/apps/macos/MeetingAssistantMac/Vendor/meeting_core_ffi/lib" \
-swift build --package-path apps/macos/MeetingAssistantMac
-```
-
-### 5. Useful Scripts
-- `./scripts/macos/build_rust_ffi.sh`: build and copy Rust FFI artifacts
-- `./scripts/macos/xcode_build.sh`: build via `xcodebuild`
-- `./scripts/macos/build_dmg.sh`: build `.app` and package a drag-and-drop install `.dmg`
-- `./scripts/macos/open_in_xcode.sh`: open `Package.swift` in Xcode
-- `./scripts/macos/build_iconset.sh`: generate iconset/icns from source image
-
-### 6. Environment Variables
-- `MEETING_USE_RUST_FFI=1`: enable Rust FFI link mode
-- `MEETING_RUST_FFI_LIB_DIR`: directory containing Rust FFI libraries
-- `MEETING_RUST_FFI_STATIC_LIB`: optional full path to static library
-- `MEETING_XCODE_DESTINATION`: optional `xcodebuild` destination override
-
-### 7. Troubleshooting
-- `xcodebuild: command not found`: install full Xcode, not only CLI tools.
-- Rust FFI linking issues: run `./scripts/macos/build_rust_ffi.sh` first and verify `MEETING_RUST_FFI_LIB_DIR`.
-
-### 8. Build DMG and Publish to GitHub Release
-1. Build DMG (Release by default):
-```bash
-./scripts/macos/build_dmg.sh v0.1.1
-```
-2. Push tag:
-```bash
-git tag v0.1.1
-git push origin v0.1.1
-```
-3. Upload release assets (requires `gh auth login`):
-```bash
-gh release create v0.1.1 \
-  ./dist/MeetingAssistantMac-v0.1.1-macos.dmg \
-  ./dist/MeetingAssistantMac-v0.1.1-macos.dmg.sha256 \
-  --title "v0.1.1" \
-  --notes "macOS DMG release"
-```
+## 8. 开发与构建说明
+如需源码构建、Xcode 调试、DMG 打包，请查看：
+- `apps/macos/MeetingAssistantMac/README.md`
